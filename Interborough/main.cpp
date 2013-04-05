@@ -154,7 +154,7 @@ int main(int argc, char ** argv)
     glutInit(&argc, argv);
     
     //  Set up display settings
-    glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GL_DOUBLE);
     
     //  Configure initial windowing settings
     glutInitWindowPosition(0, 0);
@@ -276,11 +276,6 @@ void displayTrainScene()
     }
     
     glPopMatrix();
-    
-    
-    
-    //  Flush the buffers to the screen
-    glFlush();
 }
 
 /* Test view */
@@ -314,7 +309,6 @@ void displayCar()
     }
     glPopMatrix();
     
-    glFlush();
 }
 
 /* This function is run on every runloop. */
@@ -338,6 +332,10 @@ void display()
     
     configureSpotlight(lightID, position, direction, 90, 128);
     configureAmbientLight(GL_LIGHT1, position, direction, darkGray);
+    
+    // Flush and swap.
+    glSwapAPPLE();
+    glFlush();
 }
 
 
