@@ -204,14 +204,14 @@ void init()
     glEnable(GL_LIGHTING);
     glShadeModel(GL_SMOOTH);
 
-    //Material setup
+    // Textures
     float specular[] = {1.0, 1.0, 1.0, 1.0};
     float shinines[] = {50.0};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shinines);
-    glEnable(GL_TEXTURE_2D);
-    // Textures
-    loadTexture(*textureName, "/Users/adam/Sites/Interborough/train.bmp");
+//    glEnable(GL_TEXTURE_2D);
+
+//    loadTexture(*textureName, "train.bmp");
 }
 
 
