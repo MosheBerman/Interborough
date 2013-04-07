@@ -40,13 +40,14 @@ void train(int trainID);            //  What train are we rendering?
 
 /* Tracks */
 
-void rail();
+void trackSegmentOfLength(GLfloat length);
+void railOfLength(GLfloat length);
 void tie();
 void track();
 
 /* Platform */
 
-void platform();
+void platform(int platformID);
 
 /* Lighting */
 void configureSpotlight(GLenum lightID, float *position, float *direction, float angle, float exponent);
@@ -132,6 +133,8 @@ float blue[4] = {0.2f, .2f, 0.6f, 1.0f};
 #define TIE_WIDTH 1.2
 #define TIE_HEIGHT 0.02
 #define TIE_DEPTH 0.04
+#define TRACK_SEGMENT_LENGTH 4.0
+#define TRACK_LENGTH 1000.0
 
 /*  Car constants */
 #define CAR_LENGTH 2.0
@@ -141,10 +144,6 @@ float blue[4] = {0.2f, .2f, 0.6f, 1.0f};
 
 /* Platform Constants */
 #define PLATFORM_LENGTH 30.0f
-
-/* Texture flags */
-bool useTrainTexture = true;
-bool useSignTexture = false;
 
 /* Main Program */
 
@@ -209,9 +208,6 @@ void init()
     float shinines[] = {50.0};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shinines);
-//    glEnable(GL_TEXTURE_2D);
-
-//    loadTexture(*textureName, "train.bmp");
 }
 
 
@@ -252,7 +248,22 @@ void displayTrainScene()
         glPushMatrix();
         {
             glTranslatef(0.0f, -0.4f, -(PLATFORM_LENGTH/2));
-            platform();
+            platform(0);
+        }
+        glPopMatrix();
+        
+        glPushMatrix();
+        {
+            glTranslatef(0.0f, -0.4f, (PLATFORM_LENGTH*3));
+            platform(1);
+        }
+        glPopMatrix();
+        
+        
+        glPushMatrix();
+        {
+            glTranslatef(0.0f, -0.4f, (PLATFORM_LENGTH*3));
+            platform(2);
         }
         glPopMatrix();
         
@@ -319,19 +330,10 @@ void display()
     
     glPushMatrix();
     {
-    glRotated(worldRotation[1], 0, 1, 0);
+        glRotated(worldRotation[1], 0, 1, 0);
         displayTrainScene();
     }
     glPopMatrix();
-    /* Platform spotlight */
-    
-    float lightID = GL_LIGHT0;
-    
-    GLfloat position[4] = {0,10,-10,1};
-    GLfloat direction[4] = {0, 0, 1};
-    
-    configureSpotlight(lightID, position, direction, 90, 128);
-    configureAmbientLight(GL_LIGHT1, position, direction, darkGray);
     
     // Flush and swap.
     glSwapAPPLE();
@@ -525,8 +527,6 @@ void wheel()
 
 void car(int carID, int trainID)
 {
-
-    useTrainTexture = true;
     /*  Car */
     
     const float xFromCarCenter = 0.5;
@@ -601,37 +601,59 @@ void train(int trainID)
 void track()
 {
     
-    /* Add railroad ties to the tracks */
+    /* Add track in segments */
     
-    float spaceBetweenTies = (float)TIE_DEPTH*2.0;
-    float backOfTrack = -((float)FRUSTUM_DEPTH*2.0);
+    float backOfTrack = -TRACK_LENGTH;
     
     //  Start from the back and keep adding ties
-    while (backOfTrack < (float)FRUSTUM_DEPTH)
+    while (backOfTrack < TRACK_LENGTH)
     {
         glPushMatrix();
         {
             glTranslatef(0, 0, backOfTrack);
+            trackSegmentOfLength(TRACK_SEGMENT_LENGTH);
+        }
+        glPopMatrix();
+        
+        backOfTrack += TRACK_SEGMENT_LENGTH;
+    }
+}
+
+void trackSegmentOfLength(GLfloat length)
+{
+    
+    /* Add railroad ties to the tracks */
+    
+    float spaceBetweenTies = (float)TIE_DEPTH*2.0;
+    float segmentPosition = 0;
+    
+    //  Start from the back and keep adding ties
+    while (segmentPosition < (float)length)
+    {
+        glPushMatrix();
+        {
+            glTranslatef(0, 0, segmentPosition);
             tie();
         }
         glPopMatrix();
         
-        backOfTrack += spaceBetweenTies + (TIE_DEPTH*5);
+        segmentPosition += spaceBetweenTies + (TIE_DEPTH*5);
     }
+
     
     /* Now add the rails. */
     
     glPushMatrix();
     {
         glTranslatef(-0.45, 0, 0);
-        rail();
+        railOfLength(length);
     }
     glPopMatrix();
     
     glPushMatrix();
     {
         glTranslatef(0.5, 0, 0);
-        rail();
+        railOfLength(length);
     }
     glPopMatrix();
     
@@ -639,9 +661,10 @@ void track()
     glPushMatrix();
     {
         glTranslatef(0.2, 0, 0);
-        rail();
+        railOfLength(length);
     }
     glPopMatrix();
+    
 }
 
 void tie()
@@ -654,12 +677,12 @@ void tie()
     glEnd();
 }
 
-void rail()
+void railOfLength(GLfloat length)
 {
     glBegin(GL_QUADS);
     {
         glColor3f(0.3, 0.3, 0.3);
-        rectangularPrism(0.06, 0.04, FRUSTUM_DEPTH);
+        rectangularPrism(0.06, 0.04, length);
     }
     glEnd();
 }
@@ -734,7 +757,7 @@ void pillar()
  safety strips, and akwardly placed beams.
  
  */
-void platform()
+void platform(int platformID)
 {
     glPushMatrix();
     {
@@ -761,9 +784,7 @@ void platform()
         }
         glPopMatrix();
         
-        //
-        //  Floor Tiles
-        //
+        /* Floor Tiles */
         
         glPushMatrix();
         {
@@ -793,6 +814,9 @@ void platform()
         }
         glPopMatrix();
         
+        /* Pillars */
+        
+        {
         //  Front left
         glPushMatrix();
         {
@@ -840,7 +864,19 @@ void platform()
             pillar();
         }
         glPopMatrix();
-    }
+        }
+        
+        /* Platform spotlight */
+        
+        float lightID = platformID;
+        
+        GLfloat position[4] = {0,(platformHeight/2)+pillarHeight,0,1};
+        GLfloat direction[4] = {0, -1, 0};
+        GLfloat ambient[4] = {0.9, 0.9, 0.9, 0.5};
+        
+        configureSpotlight(lightID, position, direction, 180, 64);
+        configureAmbientLight(lightID, position, direction, ambient);
+    }    
     glPopMatrix();
     
 }
@@ -854,9 +890,28 @@ void setLightColor(GLenum light, float *ambientColor, float *specularColor, floa
     if(diffuseColor)    glLightfv(light, GL_DIFFUSE, diffuseColor);
 }
 
+/* Converts an int to a gl #defined light */
+
+int _glLightForInt(int lightID)
+{
+    int light[8] = {GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7};
+    
+    for (int i = 0; i < 7; i++) {
+        if (lightID == light[i]) {
+            return lightID;
+        }
+    }
+    
+    return light[lightID];
+}
+
 /* Configures a light as a spotlight */
 void configureSpotlight(GLenum lightID, float *position, float *direction, float angle, float exponent)
 {
+    
+    // "unwrap" the light
+    lightID = _glLightForInt(lightID);
+    
     glLightfv(lightID, GL_POSITION, position );
     glLightfv(lightID, GL_SPOT_DIRECTION, direction);
     glLightf(lightID, GL_SPOT_CUTOFF, angle); // angle is 0 to 90 or 180
@@ -867,8 +922,12 @@ void configureSpotlight(GLenum lightID, float *position, float *direction, float
     glEnable(lightID);
 }
 
+/* Configures a light as an ambient light */
 void configureAmbientLight(GLenum lightID, float *position, float *direction, float *color)
 {
+    // "unwrap" the light
+    lightID = _glLightForInt(lightID);
+    
     glLightfv(lightID, GL_POSITION, position );
     glLightfv(lightID, GL_SPOT_DIRECTION, direction);
     glLightfv(lightID, GL_AMBIENT, color);
@@ -910,22 +969,6 @@ void rectangularPrism(float width, float height, float length){
     glNormal3f(-faceWidth, faceHeight, -faceLength);
     glNormal3f(-faceWidth, faceHeight, faceLength);
     glNormal3f(faceWidth, faceHeight, faceLength);
-    
-    
-    /* Front Texture */
-    
-    if (useTrainTexture) {
-        glEnable(GL_TEXTURE_2D);
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, *textureName);
-        glTexCoord2f(0.0, 0.0);
-        glTexCoord2f(0.0, 1.0);
-        glTexCoord2f(1.0, 1.0);
-        glTexCoord2f(1.0, 0.0);
-        glDisable(GL_TEXTURE_2D);
-        
-    }
     
     /* Front Surface */
     glVertex3d(faceWidth, faceHeight, faceLength);
