@@ -209,6 +209,12 @@ void init()
     //  Turn on lighting
     glEnable(GL_LIGHTING);
     glShadeModel(GL_SMOOTH);
+    
+    //Anti-aliasing
+    glEnable (GL_LINE_SMOOTH);
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 
     // Textures
     float specular[] = {1.0, 1.0, 1.0, 1.0};
