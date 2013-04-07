@@ -7,9 +7,16 @@
 //
 
 /* GL Related Libraries */
-#include <GLUT/GLUT.h>
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/glu.h>
+
+#ifdef __APPLE__
+    #include <GLUT/GLUT.h>
+    #include <OpenGL/OpenGL.h>
+    #include <OpenGL/glu.h>
+#else
+    #include <GL/freeglut.h>
+    #include <GL/gl.h>
+    #include <GL/glu.h>
+#endif
 
 /* Standard Libraries */
 #include <iostream>
@@ -336,7 +343,7 @@ void display()
     glPopMatrix();
     
     // Flush and swap.
-    glSwapAPPLE();
+    glutSwapBuffers();
     glFlush();
 }
 
