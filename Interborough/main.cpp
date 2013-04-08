@@ -57,6 +57,7 @@ void track();
 void platform(int platformID);
 
 /* Lighting */
+void setLightColor(GLenum light, float *ambientColor, float *specularColor, float *diffuseColor);
 void configureSpotlight(GLenum lightID, float *position, float *direction, float angle, float exponent);
 void configureAmbientLight(GLenum lightID, float *position, float *direction, float *color);
 
@@ -211,16 +212,12 @@ void init()
     glShadeModel(GL_SMOOTH);
     
     //Anti-aliasing
-    glEnable (GL_LINE_SMOOTH);
+    glEnable (GL_POLYGON_SMOOTH);
     glEnable (GL_BLEND);
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-    // Textures
-    float specular[] = {1.0, 1.0, 1.0, 1.0};
-    float shinines[] = {50.0};
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shinines);
+    //This causes triangles to show.
+    //    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glHint (GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 }
 
 
@@ -260,15 +257,23 @@ void displayTrainScene()
         
         glPushMatrix();
         {
-            glTranslatef(0.0f, -0.4f, -(PLATFORM_LENGTH/2));
+            glTranslatef(0.0f, -0.4f, -(PLATFORM_LENGTH*3
+                                        ));
             platform(0);
         }
         glPopMatrix();
         
         glPushMatrix();
         {
-            glTranslatef(0.0f, -0.4f, (PLATFORM_LENGTH*3));
+            glTranslatef(0.0f, -0.4f, -(PLATFORM_LENGTH/2));
             platform(1);
+        }
+        glPopMatrix();
+        
+        glPushMatrix();
+        {
+            glTranslatef(0.0f, -0.4f, (PLATFORM_LENGTH*3));
+            platform(2);
         }
         glPopMatrix();
         
@@ -276,7 +281,7 @@ void displayTrainScene()
         glPushMatrix();
         {
             glTranslatef(0.0f, -0.4f, (PLATFORM_LENGTH*3));
-            platform(2);
+            platform(3);
         }
         glPopMatrix();
         
@@ -742,7 +747,7 @@ void platformBase()
 {
     glBegin(GL_QUADS);
     {
-        glColor4fv(white);
+        glColor4fv(darkGray);
         
         //  Platform surface
         rectangularPrism(platformWidth, platformHeight, PLATFORM_LENGTH);
@@ -883,12 +888,15 @@ void platform(int platformID)
         
         float lightID = platformID;
         
-        GLfloat position[4] = {0,(platformHeight/2)+pillarHeight,0,1};
-        GLfloat direction[4] = {0, -1, 0};
-        GLfloat ambient[4] = {0.9, 0.9, 0.9, 0.5};
-        
-        configureSpotlight(lightID, position, direction, 180, 64);
+        GLfloat position[4] = {0,-(platformHeight/2)+pillarHeight*2,0,1};
+        GLfloat direction[4] = {0, 0, 0};
+        GLfloat ambient[4] = {0.7, 0.7, 0.7, 0.1};
+        GLfloat specular[4] = {0.7, 0.7, 0.7, 0.1};
+        GLfloat diffuse[4] = {0.7, 0.7, 0.7, 0.01};
+    
+        configureSpotlight(lightID, position, direction, 90, 2);
         configureAmbientLight(lightID, position, direction, ambient);
+        setLightColor(lightID, ambient, specular, diffuse);
     }    
     glPopMatrix();
     
