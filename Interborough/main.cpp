@@ -24,7 +24,6 @@
 #include <vector>
 
 /* Loader Library */
-#include "Loader.h"
 
 #pragma mark - OpenGL
 
@@ -53,7 +52,6 @@ void tie();
 void track();
 
 /* Platform */
-
 void platform(int platformID);
 
 /* Lighting */
@@ -68,10 +66,6 @@ void alternateColor(float *firstColor, float *secondColor);
 /* Creates vertices of a rect prism with given dimensions */
 void rectangularPrism(float width, float height, float length);
 
-/* Got the texture stuff from Julius. */
-GLuint *textureName = new GLuint;
-void loadTexture(GLuint texture, const char* filename);
-Image* image;
 
 #pragma mark - Globals
 
@@ -223,17 +217,23 @@ void init()
 
 void reshape(int width, int height)
 {
+    
+    float ratio = (float)width / (float)height;
+    
     // Apply perspective matrix
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45, (float)width / (float)height, 1.0, FRUSTUM_DEPTH);
+    
+    gluPerspective(45, ratio, 1.0, FRUSTUM_DEPTH);
+    
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
     // Change the camera to a 3D view
-    glFrustum( -1 * (float) WINDOW_WIDTH / WINDOW_HEIGHT,
-              (float) WINDOW_WIDTH / WINDOW_HEIGHT,
+    	glViewport(0, 0, width, height);
+    glFrustum( -1 * (float) width/2,
+              (float) width/2,
               -10.0,
               10.0,
               -FRUSTUM_DEPTH,
@@ -1049,24 +1049,6 @@ void rectangularPrism(float width, float height, float length){
     glDisable(GL_NORMALIZE);
 }
 
-void loadTexture(GLuint texture, const char* filename)
-{
-    //glEnable(GL_TEXTURE_2D);
-    image = loadBMP(filename);
-    
-    
-    glGenTextures(1, &textureName[0]);
-    glBindTexture(GL_TEXTURE_2D, *textureName);
-    
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE , GL_MODULATE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, image->width, image->height, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
-    //glDisable(GL_TEXTURE_2D);
-}
 
 #pragma mark - Animation
 
