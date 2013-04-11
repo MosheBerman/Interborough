@@ -15,10 +15,20 @@ A 3D model of a subway for my OpenGL class.
     E - World Up
     F - World Down
     
-**Rotation** 
+**Rotation: X Axis**
 
-    J - Rotate World Clockwise (Y axis)
-    K - Rotate World Counterclockwise (Y axis)    
+    M - Clockwise 
+    N - Counterclockwise
+
+**Rotation: Y Axis**        
+
+    J - Clockwise
+    K - Counterclockwise
+    
+**Rotation: Z Axis**        
+    
+    H - Clockwise 
+    B - Counterclockwise
 
 **Trains**
 
